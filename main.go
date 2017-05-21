@@ -6,15 +6,44 @@ import (
 	"log"
 	"bufio"
 	"os/user"
+	"sort"
 )
 
-func main() {
-	commandsFreq := getCommandsFreq()
-
-	fmt.Println(commandsFreq)
+type command struct {
+	command string
+	freq int
 }
 
-func getCommandsFreq() map[string]int {
+type commands []command
+
+func (slice commands) Len() int {
+	return len(slice)
+}
+func (slice commands) Swap(i, j int) {
+	slice[i], slice[j] = slice[j], slice[i]
+}
+func (slice commands) Less(i, j int) bool {
+	return slice[i].freq < slice[j].freq
+}
+
+func main() {
+	commandsList := initCommands(getCommandsFrequencies())
+	sort.Sort(commands(commandsList))
+
+	fmt.Println(commandsList)
+}
+
+func initCommands(commandsFreq map[string]int) []command {
+	commands := []command{}
+
+	for cmd, freq := range commandsFreq {
+		commands = append(commands, command{cmd, freq})
+	}
+
+	return commands
+}
+
+func getCommandsFrequencies() map[string]int {
 	commandsFreq := make(map[string]int)
 
 	for command := range getHistoryContent() {
