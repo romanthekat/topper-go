@@ -28,7 +28,7 @@ func (slice commands) Less(i, j int) bool {
 
 func main() {
 	commandsList := initCommands(getCommandsFrequencies())
-	sort.Sort(commands(commandsList))
+	sort.Sort(sort.Reverse(commands(commandsList)))
 
 	fmt.Println(commandsList)
 }
