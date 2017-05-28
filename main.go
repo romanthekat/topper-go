@@ -9,53 +9,62 @@ import (
 	"sort"
 )
 
-type command struct {
+type Command struct {
 	command string
+	number int
 	freq int
 }
 
-type commands []command
+type Commands []*Command
 
-func (slice commands) Len() int {
+func (slice Commands) Len() int {
 	return len(slice)
 }
-func (slice commands) Swap(i, j int) {
+
+func (slice Commands) Swap(i, j int) {
 	slice[i], slice[j] = slice[j], slice[i]
 }
-func (slice commands) Less(i, j int) bool {
+
+func (slice Commands) Less(i, j int) bool {
 	return slice[i].freq < slice[j].freq
 }
 
+
 func main() {
-	commandsList := initCommands(getCommandsFrequencies())
-	sort.Sort(sort.Reverse(commands(commandsList)))
+	commandsList := getCommands()
+	sort.Sort(sort.Reverse(Commands(commandsList)))
 
-	fmt.Println(commandsList)
-}
-
-func initCommands(commandsFreq map[string]int) []command {
-	commands := []command{}
-
-	for cmd, freq := range commandsFreq {
-		commands = append(commands, command{cmd, freq})
+	for _, command := range commandsList {
+		fmt.Printf("%5d: %v (x%d)\n", command.number, command.command, command.freq)
 	}
-
-	return commands
 }
 
-func getCommandsFrequencies() map[string]int {
-	commandsFreq := make(map[string]int)
+func getCommands() []*Command {
+	commandStructs := make(map[string]*Command)
 
-	for command := range getHistoryContent() {
-		value, exists := commandsFreq[command]
+	number := 1
+	for commandString := range getHistoryContent() {
+		command, exists := commandStructs[commandString]
 		if exists {
-			commandsFreq[command] = value + 1
+			command.freq = command.freq + 1
 		} else {
-			commandsFreq[command] = 1
+			commandStructs[commandString] = &Command{command: commandString, number: number, freq: 1}
 		}
+
+		number++
 	}
 
-	return commandsFreq
+	return getValuesFromMap(commandStructs)
+}
+
+func getValuesFromMap(commandStructs map[string]*Command) []*Command {
+	values := make([]*Command, 0, len(commandStructs))
+
+	for _, value := range commandStructs {
+		values = append(values, value)
+	}
+
+	return values
 }
 
 func getHistoryContent() <-chan string {
