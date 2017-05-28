@@ -7,6 +7,7 @@ import (
 	"bufio"
 	"os/user"
 	"sort"
+	"strconv"
 )
 
 type Command struct {
@@ -29,21 +30,39 @@ func (slice Commands) Less(i, j int) bool {
 	return slice[i].freq < slice[j].freq
 }
 
-
 func main() {
-	commandsList := getCommands()
+	commandsList := getCommands(getHistoryContent())
 	sort.Sort(sort.Reverse(Commands(commandsList)))
 
-	for _, command := range commandsList {
+	lastCommandNum := getLastCommandNum()
+	for _, command := range commandsList[0:min(lastCommandNum, len(commandsList))] {
 		fmt.Printf("%5d: %v (x%d)\n", command.number, command.command, command.freq)
 	}
 }
 
-func getCommands() []*Command {
-	return getCommandsByValues(getHistoryContent())
+func getLastCommandNum() int {
+	args := os.Args
+	if len(args) > 1 {
+		maxCommandNum, err := strconv.Atoi(args[1])
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		return maxCommandNum
+	} else {
+		return 10 //default top commands count
+	}
 }
 
-func getCommandsByValues(commandsChan <-chan string) []*Command {
+func min(x, y int) int {
+	if x < y {
+		return x
+	} else {
+		return y
+	}
+}
+
+func getCommands(commandsChan <-chan string) []*Command {
 	commandStructs := make(map[string]*Command)
 
 	number := 1
