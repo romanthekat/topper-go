@@ -1,7 +1,7 @@
 # topper-go
 That little tool parses you .bash_history file, and calculates commands to be the most called.
 
-##How to build
+## How to build
 
 `go build -o topper-go main.go`
  or
@@ -9,7 +9,7 @@ That little tool parses you .bash_history file, and calculates commands to be th
 
 that will produce `topper-go` or `tg` executable file
 
-##How to use
+## How to use
 
 `tg` - to show top 10 commands
 
