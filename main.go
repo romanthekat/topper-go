@@ -40,10 +40,14 @@ func main() {
 }
 
 func getCommands() []*Command {
+	return getCommandsByValues(getHistoryContent())
+}
+
+func getCommandsByValues(commandsChan <-chan string) []*Command {
 	commandStructs := make(map[string]*Command)
 
 	number := 1
-	for commandString := range getHistoryContent() {
+	for commandString := range commandsChan {
 		command, exists := commandStructs[commandString]
 		if exists {
 			command.freq = command.freq + 1
