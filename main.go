@@ -1,10 +1,10 @@
 package main
 
 import (
-	"fmt"
-	"os"
-	"log"
 	"bufio"
+	"fmt"
+	"log"
+	"os"
 	"os/user"
 	"sort"
 	"strconv"
@@ -12,8 +12,8 @@ import (
 
 type Command struct {
 	command string
-	number int
-	freq int
+	number  int
+	freq    int
 }
 
 type Commands []*Command
@@ -104,7 +104,6 @@ func getHistoryFilename() string {
 	return currentUser.HomeDir + "/.bash_history"
 }
 
-
 func ReadByLine(filename string) <-chan string {
 	file, err := os.Open(filename)
 	if err != nil {
@@ -118,7 +117,7 @@ func ReadByLine(filename string) <-chan string {
 
 		scanner := bufio.NewScanner(file)
 
-		for (scanner.Scan()) {
+		for scanner.Scan() {
 			lines <- scanner.Text()
 		}
 
