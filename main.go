@@ -70,6 +70,7 @@ func getCommands(commandsChan <-chan string) []*Command {
 		command, exists := commandStructs[commandString]
 		if exists {
 			command.freq = command.freq + 1
+			command.number = number
 		} else {
 			commandStructs[commandString] = &Command{command: commandString, number: number, freq: 1}
 		}
