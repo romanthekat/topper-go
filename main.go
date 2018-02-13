@@ -10,6 +10,8 @@ import (
 	"strconv"
 )
 
+const defaultTopCommandsCount = 10
+
 type Command struct {
 	command string
 	number  int
@@ -34,23 +36,23 @@ func main() {
 	commandsList := getCommands(getHistoryContent())
 	sort.Sort(sort.Reverse(Commands(commandsList)))
 
-	lastCommandNum := getLastCommandNum()
+	lastCommandNum := getTopCommandsCount()
 	for _, command := range commandsList[0:min(lastCommandNum, len(commandsList))] {
 		fmt.Printf("%5d: %v (x%d)\n", command.number, command.command, command.freq)
 	}
 }
 
-func getLastCommandNum() int {
+func getTopCommandsCount() int {
 	args := os.Args
 	if len(args) > 1 {
-		maxCommandNum, err := strconv.Atoi(args[1])
+		topCommandsCount, err := strconv.Atoi(args[1])
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		return maxCommandNum
+		return topCommandsCount
 	} else {
-		return 10 //default top commands count
+		return defaultTopCommandsCount
 	}
 }
 
