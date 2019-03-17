@@ -70,7 +70,6 @@ func getTopCommandsCount(defaultTopCommandsCount int) int {
 	}
 }
 
-
 func getCommands(commandsChan <-chan string) Commands {
 	commandStructs := make(map[string]*Command)
 
