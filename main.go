@@ -7,7 +7,6 @@ import (
 	"os"
 	"sort"
 	"strconv"
-	"strings"
 )
 
 const defaultTopCommandsCount = 10
@@ -120,14 +119,6 @@ func getValuesFromMap(commandStructs map[string]*Command) Commands {
 	return values
 }
 
-func min(x, y int) int {
-	if x < y {
-		return x
-	} else {
-		return y
-	}
-}
-
 func readShellHistory(shell Shell) <-chan string {
 	file, err := os.Open(shell.getHistoryFullFilename())
 	if err != nil {
@@ -143,9 +134,9 @@ func readShellHistory(shell Shell) <-chan string {
 
 		for scanner.Scan() {
 			line := scanner.Text()
-			line = strings.TrimSpace(line)
+			line = shell.historyLineToCommand(line)
 
-			if len(line) > 0 {
+			if lineContainsCommand(line) {
 				lines <- line
 			}
 		}
@@ -159,4 +150,16 @@ func readShellHistory(shell Shell) <-chan string {
 	}()
 
 	return lines
+}
+
+func lineContainsCommand(line string) bool {
+	return len(line) > 0
+}
+
+func min(x, y int) int {
+	if x < y {
+		return x
+	} else {
+		return y
+	}
 }

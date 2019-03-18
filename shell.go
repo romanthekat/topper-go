@@ -62,7 +62,7 @@ var returnAsIs = func(rawLine string) string {
 var getCommandFromZshHistoryLine = func(rawLine string) string {
 	delimiterPos := strings.Index(rawLine, ";")
 	if delimiterPos == -1 {
-		log.Fatalf("zsh history line parsing failed, searching for ';' failed, line: %s", rawLine)
+		return "" //skip
 	}
 
 	return rawLine[delimiterPos+1:]
