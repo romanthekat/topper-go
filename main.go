@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/user"
 	"sort"
 	"strconv"
+	"strings"
 )
 
 const defaultTopCommandsCount = 10
@@ -89,19 +89,25 @@ func getCommands(commandsChan <-chan string) Commands {
 	return getValuesFromMap(commandStructs)
 }
 
-//TODO check echo $SHELL
 func getShellHistory() <-chan string {
-	historyFilename := getHistoryFilename()
-	return readByLine(historyFilename)
+	shell := getCurrentShell()
+	return readShellHistory(shell)
 }
 
-func getHistoryFilename() string {
-	currentUser, err := user.Current()
-	if err != nil {
-		log.Fatal(err)
+func getCurrentShell() Shell {
+	shellBinary := os.Getenv("SHELL")
+
+	return getCurrentShellByBinary(shellBinary)
+}
+
+func getCurrentShellByBinary(shellBinary string) Shell {
+	shell := getShellByBinary(shellBinary)
+
+	if equals(shell, unknownShell) {
+		log.Fatalf("Unknown shell detected: %s", shellBinary)
 	}
 
-	return currentUser.HomeDir + "/.bash_history"
+	return shell
 }
 
 func getValuesFromMap(commandStructs map[string]*Command) Commands {
@@ -122,9 +128,8 @@ func min(x, y int) int {
 	}
 }
 
-//readByLine returns a channel of lines of specified filename
-func readByLine(filename string) <-chan string {
-	file, err := os.Open(filename)
+func readShellHistory(shell Shell) <-chan string {
+	file, err := os.Open(shell.getHistoryFullFilename())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -137,7 +142,12 @@ func readByLine(filename string) <-chan string {
 		scanner := bufio.NewScanner(file)
 
 		for scanner.Scan() {
-			lines <- scanner.Text()
+			line := scanner.Text()
+			line = strings.TrimSpace(line)
+
+			if len(line) > 0 {
+				lines <- line
+			}
 		}
 
 		close(lines)

@@ -25,7 +25,7 @@ func TestGetTopCommandsGenericUsecase(t *testing.T) {
 		t.Errorf("Wrong command, should be two, but %s", commandTwo)
 	}
 
-	commandOne:= commands[2]
+	commandOne := commands[2]
 	if !strings.Contains(commandOne.command, "one") {
 		t.Errorf("Wrong command, should be one, but %s", commandOne)
 	}
@@ -33,14 +33,14 @@ func TestGetTopCommandsGenericUsecase(t *testing.T) {
 
 func TestTopCommandsCountIfFoundLess(t *testing.T) {
 	shellCommands := getMockShellCommands() //returns 6 commands, 3 different
-	topCommandsCount := 4 //more than actually provided
+	topCommandsCount := 4                   //more than actually provided
 
 	commands := getTopCommands(shellCommands, topCommandsCount)
 
 	if len(commands) != 3 {
-		t.Errorf("Only 3 different commands provided, " +
-			"requested top count is %d, " +
-			"commands size must be 3\n" +
+		t.Errorf("Only 3 different commands provided, "+
+			"requested top count is %d, "+
+			"commands size must be 3\n"+
 			"commands = %s",
 			topCommandsCount, commands)
 	}
@@ -48,20 +48,36 @@ func TestTopCommandsCountIfFoundLess(t *testing.T) {
 
 func TestTopCommandsCountIfFoundMore(t *testing.T) {
 	shellCommands := getMockShellCommands() //returns 6 commands, 3 different
-	topCommandsCount := 2 //less than actually provided
+	topCommandsCount := 2                   //less than actually provided
 
 	commands := getTopCommands(shellCommands, topCommandsCount)
 
 	if len(commands) != topCommandsCount {
-		t.Errorf("Only 3 different commands provided, " +
-			"requested top count is %d, which is less," +
-			"commands size must be %d\n" +
+		t.Errorf("Only 3 different commands provided, "+
+			"requested top count is %d, which is less,"+
+			"commands size must be %d\n"+
 			"commands = %s",
 			topCommandsCount, topCommandsCount, commands)
 	}
 }
 
-func getMockShellCommands() <- chan string{
+func TestGetShellByBinary(t *testing.T) {
+	shell := getShellByBinary("/bin/bash")
+
+	if shell.binaryName != "bash" {
+		t.Fatalf("Wrong shell found, must be bash, but %s", shell)
+	}
+}
+
+func TestGetShellByBinaryUnknownShell(t *testing.T) {
+	shell := getShellByBinary("/meow/shell")
+
+	if shell.binaryName != unknownShell.binaryName {
+		t.Fatalf("Wrong shell found, must be unknown, but %s", shell)
+	}
+}
+
+func getMockShellCommands() <-chan string {
 	shellCommands := make(chan string, 6)
 
 	shellCommands <- "one"
