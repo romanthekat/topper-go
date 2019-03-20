@@ -11,7 +11,7 @@ import (
 
 const defaultTopCommandsCount = 10
 
-//Command represents shell command
+//Command contains shell command information within all calls
 type Command struct {
 	command string
 	number  int
@@ -22,7 +22,7 @@ func (c Command) String() string {
 	return fmt.Sprintf("%5d: %v (x%d)", c.number, c.command, c.freq)
 }
 
-//Commands represents sortable (by freq) collection of shell commands
+//Commands is sortable (by freq) collection of shell commands
 type Commands []*Command
 
 func (slice Commands) Len() int {
@@ -37,6 +37,9 @@ func (slice Commands) Less(i, j int) bool {
 	return slice[i].freq < slice[j].freq
 }
 
+//CommandsCalls is a channel of raw commands sequence
+type CommandsCalls <-chan string
+
 func main() {
 	topCommandsCount := getTopCommandsCount(defaultTopCommandsCount)
 	shellHistory := getShellHistory()
@@ -48,49 +51,36 @@ func main() {
 	}
 }
 
-func getTopCommands(shellHistory <-chan string, topCommandsCount int) Commands {
+func getShellHistory() CommandsCalls {
+	shell := getCurrentShell()
+	return readShellHistory(shell)
+}
+
+func getTopCommands(shellHistory CommandsCalls, topCommandsCount int) Commands {
 	commands := getCommands(shellHistory)
 	sort.Sort(sort.Reverse(commands))
 
 	return commands[0:min(topCommandsCount, len(commands))]
 }
 
-func getTopCommandsCount(defaultTopCommandsCount int) int {
-	args := os.Args
-	if len(args) > 1 {
-		topCommandsCount, err := strconv.Atoi(args[1])
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		return topCommandsCount
-	} else {
-		return defaultTopCommandsCount
-	}
-}
-
-func getCommands(commandsChan <-chan string) Commands {
-	commandStructs := make(map[string]*Command)
+//TODO command number calculation is a bit obscure
+func getCommands(shellHistory CommandsCalls) Commands {
+	commands := make(map[string]*Command)
 
 	number := 1
-	for commandString := range commandsChan {
-		command, exists := commandStructs[commandString]
+	for commandString := range shellHistory {
+		command, exists := commands[commandString]
 		if exists {
 			command.freq = command.freq + 1
 			command.number = number
 		} else {
-			commandStructs[commandString] = &Command{command: commandString, number: number, freq: 1}
+			commands[commandString] = &Command{command: commandString, number: number, freq: 1}
 		}
 
 		number++
 	}
 
-	return getValuesFromMap(commandStructs)
-}
-
-func getShellHistory() <-chan string {
-	shell := getCurrentShell()
-	return readShellHistory(shell)
+	return getValuesFromMap(commands)
 }
 
 func getCurrentShell() Shell {
@@ -109,6 +99,20 @@ func getCurrentShellByBinary(shellBinary string) Shell {
 	return shell
 }
 
+func getTopCommandsCount(defaultTopCommandsCount int) int {
+	args := os.Args
+	if len(args) > 1 {
+		topCommandsCount, err := strconv.Atoi(args[1])
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		return topCommandsCount
+	} else {
+		return defaultTopCommandsCount
+	}
+}
+
 func getValuesFromMap(commandStructs map[string]*Command) Commands {
 	values := make([]*Command, 0, len(commandStructs))
 
@@ -119,7 +123,7 @@ func getValuesFromMap(commandStructs map[string]*Command) Commands {
 	return values
 }
 
-func readShellHistory(shell Shell) <-chan string {
+func readShellHistory(shell Shell) CommandsCalls {
 	file, err := os.Open(shell.getHistoryFullFilename())
 	if err != nil {
 		log.Fatal(err)
