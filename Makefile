@@ -7,7 +7,7 @@
 
 ## Build all binaries
 build:
-	@go test && go build -o tg_linux main.go
+	@go build -o topper-go main.go
 
 ## Execute development pipeline
 build.linux: 
