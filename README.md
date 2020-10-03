@@ -2,9 +2,18 @@
 This little tool parses your `.bash_history` file, and calculates the most frequent commands.
 
 ## How to build
+* with makefile: 
+
+`make build` will produce topper-go executable file
+
+`make build.mac` or `make build.linux`
+
+* with go command
 
 `go build -o topper-go main.go`
+
  or
+
 `go build -o tg main.go`
 
 that will produce `topper-go` or `tg` executable file.
