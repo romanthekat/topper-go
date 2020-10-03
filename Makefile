@@ -10,7 +10,6 @@ build:
 ## Build linux binary
 build.linux: 
 	@env GOOS=linux GOARCH=amd64 go test && go build -o tg_linux main.go
-	
 
 ## Build macos binary
 build.mac:
